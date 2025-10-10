@@ -1,0 +1,27 @@
+{
+  "name": "ava",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ava - Compliance-aware workspace and task management platform",
+  "scripts": {
+    "dev": "pnpm --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean && rm -rf node_modules",
+    "web": "pnpm --filter @ava/web dev",
+    "types:check": "pnpm --filter @ava/common-types run type-check"
+  },
+  "keywords": [
+    "compliance",
+    "workspace",
+    "task-management",
+    "rules-engine"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
+

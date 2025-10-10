@@ -1,0 +1,27 @@
+{
+  "name": "@ava/rules-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core rules engine for Ava compliance checking",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@ava/common-types": "workspace:*",
+    "micromatch": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/micromatch": "^4.0.6",
+    "@types/jest": "^29.5.11",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  }
+}
+

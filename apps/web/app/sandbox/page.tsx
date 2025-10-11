@@ -1,307 +1,328 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { FileTreeNode, RuleViolation, Rule } from '@ava/common-types';
-import { RulesEngine } from '@ava/rules-engine';
-import { RuleTemplates } from '@ava/rules-engine';
-import { FileTree } from '@/components/file-tree';
-import { CompliancePanel } from '@/components/compliance-panel';
-import { RuleTemplatesPanel } from '@/components/rule-templates-panel';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  SparklesIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline';
+import { Agent, FolderNode } from '@/store/agent-store';
+import { FolderTreeWithAgents } from '@/components/folder-tree-with-agents';
+import { AgentCreator } from '@/components/agent-creator';
+import { AgentListPanel } from '@/components/agent-list-panel';
+import { AgentTemplatesPanel } from '@/components/agent-templates-panel';
 import { Badge } from '@/components/ui/badge';
-import { createDemoFileTree, createDemoRules, createDemoWorkspace } from '@/lib/demo-data';
-import { Play, Settings, FileText, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  createDemoWorkspaceId,
+  createDemoFolderTree,
+  createDemoAgents,
+  getAgentTemplates,
+  AgentTemplate
+} from '@/lib/agent-demo-data';
+import { Gugi } from 'next/font/google';
+
+const gugi = Gugi({ weight: '400', subsets: ['latin'] });
 
 export default function SandboxPage() {
-  const [workspace] = useState(createDemoWorkspace);
-  const [fileTree] = useState<FileTreeNode>(createDemoFileTree);
-  const [rules, setRules] = useState<Rule[]>(createDemoRules);
-  const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null);
-  const [violations, setViolations] = useState<RuleViolation[]>([]);
-  const [isChecking, setIsChecking] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [folderTree] = useState<FolderNode>(createDemoFolderTree());
+  const [agents, setAgents] = useState<Agent[]>(createDemoAgents());
+  const [selectedFolder, setSelectedFolder] = useState<FolderNode | null>(null);
+  const [isCreatingAgent, setIsCreatingAgent] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [workspaceName] = useState('Demo Workspace');
 
-  // Extract all files from tree (flatten)
-  const extractAllFiles = (node: FileTreeNode): FileTreeNode[] => {
-    const files: FileTreeNode[] = [];
-    
-    if (node.type === 'file') {
-      files.push(node);
-    }
-    
-    if (node.children) {
-      for (const child of node.children) {
-        files.push(...extractAllFiles(child));
-      }
-    }
-    
-    return files;
+  const handleAddAgent = (folder: FolderNode) => {
+    setSelectedFolder(folder);
+    setIsCreatingAgent(true);
+    setShowTemplates(false);
   };
 
-  // Run compliance check
-  const runComplianceCheck = async () => {
-    setIsChecking(true);
-    const engine = new RulesEngine();
+  const handleSaveAgent = (agentData: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newAgent: Agent = {
+      ...agentData,
+      id: `agent-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     
-    // Get all files from tree
-    const files = extractAllFiles(fileTree);
-    
-    // Check files
-    const result = await engine.checkFiles(files, rules);
-    setViolations(result.violations);
-    
-    setIsChecking(false);
+    setAgents([...agents, newAgent]);
+    setIsCreatingAgent(false);
   };
 
-  // Calculate violations per file
-  const violationsByFile = useMemo(() => {
-    const map: Record<string, number> = {};
-    violations.forEach(v => {
-      map[v.fileNodeId] = (map[v.fileNodeId] || 0) + 1;
-    });
-    return map;
-  }, [violations]);
+  const handleCancelCreate = () => {
+    setIsCreatingAgent(false);
+  };
 
-  // Auto-run check when rules or files change
-  useEffect(() => {
-    void runComplianceCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rules, fileTree]);
+  const handleSelectFolder = (folder: FolderNode) => {
+    setSelectedFolder(folder);
+    setIsCreatingAgent(false);
+  };
+
+  const handleEditAgent = (agent: Agent) => {
+    console.log('Edit agent:', agent);
+  };
+
+  const handleDeleteAgent = (agent: Agent) => {
+    if (confirm(`Are you sure you want to delete "${agent.name}"?`)) {
+      setAgents(agents.filter(a => a.id !== agent.id));
+    }
+  };
+
+  const handleToggleAgent = (agent: Agent) => {
+    setAgents(agents.map(a =>
+      a.id === agent.id ? { ...a, enabled: !a.enabled, updatedAt: new Date() } : a
+    ));
+  };
+
+  const handleRunAgent = (agent: Agent) => {
+    alert(`Running agent: ${agent.name}\n\nThis would trigger the agent execution in production.`);
+  };
+
+  const handleSelectTemplate = (template: AgentTemplate) => {
+    if (!selectedFolder) {
+      alert('Please select a folder first');
+      return;
+    }
+
+    const templateAgent: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'> = {
+      workspaceId: createDemoWorkspaceId(),
+      folderPath: selectedFolder.path,
+      name: template.name,
+      fileName: `${template.name.toLowerCase().replace(/\s+/g, '-')}.ava`,
+      prompt: template.promptTemplate,
+      context: template.contextTemplate,
+      contextLinks: [],
+      contextMcpServers: [],
+      triggerType: template.defaultTrigger,
+      triggerConfig: {},
+      scope: { applyToAll: true },
+      type: template.type,
+      enabled: true,
+      createdBy: 'current-user'
+    };
+
+    handleSaveAgent(templateAgent);
+    setShowTemplates(false);
+  };
+
+  const enabledAgentsCount = agents.filter(a => a.enabled).length;
+  const totalAgentsCount = agents.length;
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b bg-background px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-xl font-bold text-slate-900">
-            Ava
-          </Link>
-          <Badge variant="outline" className="bg-purple-50 text-black border-purple-200">
-            Sandbox Mode
-          </Badge>
-          <span className="text-sm text-slate-600">{workspace.name}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowTemplates(!showTemplates)}
-          >
-            <Settings size={16} className="mr-2" />
-            Rule Templates
-          </Button>
-          <ThemeToggle />
-          <Button
-            size="sm"
-            onClick={runComplianceCheck}
-            disabled={isChecking}
-          >
-            <Play size={16} className="mr-2" />
-            {isChecking ? 'Checking...' : 'Run Check'}
-          </Button>
-        </div>
-      </header>
+    <div className="h-screen bg-white dark:bg-gray-900">
+      {/* Mobile sidebar */}
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+        />
 
-      {/* Info Banner */}
-      <div className="bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-900 px-4 py-3">
-        <div className="flex items-start gap-3">
-          <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="flex-1 text-sm">
-            <p className="text-blue-900 dark:text-blue-100 font-medium mb-1">
-              Welcome to Ava Sandbox!
-            </p>
-            <p className="text-blue-700 dark:text-blue-300">
-              This is a safe environment to explore compliance rules. Try clicking files to see violations,
-              or add new rules from templates. Nothing here affects real data.
-            </p>
+        <div className="fixed inset-0 flex">
+          <DialogPanel
+            transition
+            className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+          >
+            <TransitionChild>
+              <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
+                <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
+                  <span className="sr-only">Close sidebar</span>
+                  <XMarkIcon aria-hidden="true" className="size-6 text-white" />
+                </button>
+              </div>
+            </TransitionChild>
+
+            <div className="relative flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-r dark:before:border-white/10 dark:before:bg-black/10">
+            <div className="relative flex h-16 shrink-0 items-center">
+              <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <span className={`ml-2 text-xl font-bold dark:text-white ${gugi.className}`}>AVA</span>
+            </div>
+              <nav className="relative flex flex-1 flex-col">
+                <div className="flex-1">
+                  <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3">PROJECT STRUCTURE</h2>
+                  <FolderTreeWithAgents
+                    tree={folderTree}
+                    agents={agents}
+                    onSelectFolder={handleSelectFolder}
+                    onAddAgent={handleAddAgent}
+                    selectedFolderId={selectedFolder?.id}
+                  />
+                </div>
+              </nav>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Static sidebar for desktop */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
+        <div className="relative flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
+          <div className="relative flex h-16 shrink-0 items-center">
+            <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            <span className={`ml-2 text-xl font-bold text-gray-900 dark:text-white ${gugi.className}`}>AVA</span>
+            <Badge variant="outline" className="ml-3 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
+              Sandbox
+            </Badge>
           </div>
+          <nav className="relative flex flex-1 flex-col">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500">PROJECT STRUCTURE</h2>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {enabledAgentsCount}/{totalAgentsCount} active
+                </span>
+              </div>
+              <FolderTreeWithAgents
+                tree={folderTree}
+                agents={agents}
+                onSelectFolder={handleSelectFolder}
+                onAddAgent={handleAddAgent}
+                selectedFolderId={selectedFolder?.id}
+              />
+            </div>
+            <div className="-mx-6 mt-auto border-t border-gray-200 dark:border-white/10">
+              <div className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="size-8 rounded-full bg-gray-50 flex items-center justify-center outline-1 -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10">
+                  <span className="text-xs">DC</span>
+                </span>
+                <span aria-hidden="true">{workspaceName}</span>
+              </div>
+            </div>
+          </nav>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* File Tree Sidebar */}
-        <aside className="w-64 border-r bg-muted overflow-y-auto">
-          <div className="p-3 border-b bg-background">
-            <h2 className="font-semibold text-sm">Files</h2>
+      {/* Mobile header */}
+      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden dark:bg-gray-900 dark:shadow-none dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-b dark:before:border-white/10 dark:before:bg-black/10">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="relative -m-2.5 p-2.5 text-gray-700 lg:hidden dark:text-gray-400"
+        >
+          <span className="sr-only">Open sidebar</span>
+          <Bars3Icon aria-hidden="true" className="size-6" />
+        </button>
+        <div className="relative flex-1 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          <span className={gugi.className}>AVA</span> Sandbox
           </div>
-          <div className="p-2">
-            <FileTree
-              tree={fileTree}
-              onSelectFile={setSelectedFile}
-              selectedFileId={selectedFile?.id}
-              violations={violationsByFile}
-            />
+        <button
+          onClick={() => setShowTemplates(!showTemplates)}
+          aria-label="Toggle settings"
+          className="relative rounded-md text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+        >
+          <Cog6ToothIcon className="size-6" />
+        </button>
           </div>
-        </aside>
 
-        {/* Center Content */}
-        <main className="flex-1 overflow-y-auto">
-          {selectedFile ? (
-            <div className="p-6">
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText size={20} className="text-slate-600" />
-                  <h1 className="text-xl font-semibold">{selectedFile.name}</h1>
-                  {violationsByFile[selectedFile.id] && (
-                    <Badge variant="warning" className="text-black">
-                      {violationsByFile[selectedFile.id]} issue{violationsByFile[selectedFile.id] > 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-slate-600">{selectedFile.path}</p>
-              </div>
-
-              {/* File Violations */}
-              {violations.filter(v => v.fileNodeId === selectedFile.id).length > 0 && (
-                <Card className="mb-4 border-orange-200 bg-orange-50">
-                  <CardHeader>
-                    <CardTitle className="text-black flex items-center gap-2">
-                      <AlertCircle size={18} className="text-orange-600" />
-                      Compliance Issues
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-slate-600">
-                    {violations
-                      .filter(v => v.fileNodeId === selectedFile.id)
-                      .map(violation => (
-                        <div key={violation.id} className="bg-white rounded-lg p-3 border">
-                          <div className="flex items-start gap-2">
-                            <Badge
-                              variant={
-                                violation.severity === 'error' ? 'destructive' :
-                                violation.severity === 'warning' ? 'warning' : 'info'
-                              }
-                              className="text-black"
-                            >
-                              {violation.severity}
-                            </Badge>
-                            <div className="flex-1">
-                              <p className="font-medium text-sm mb-1">{violation.message}</p>
-                              {violation.context.suggestedFix && (
-                                <p className="text-xs text-slate-600">
-                                  💡 {violation.context.suggestedFix}
-                                </p>
-                              )}
+      {/* Main content area */}
+      <main className="lg:pl-80">
+        <div className="xl:pr-96">
+          <div className="h-screen overflow-y-auto">
+            {/* Info banner */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-purple-200 px-4 py-3 sm:px-6 lg:px-8 dark:from-purple-950/30 dark:to-blue-950/30 dark:border-purple-900">
+              <div className="flex items-start gap-3">
+                <SparklesIcon className="size-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 text-sm">
+                  <p className="text-purple-900 dark:text-purple-100 font-medium mb-1">
+                    Welcome to Ava Agent Studio
+                  </p>
+                  <p className="text-purple-700 dark:text-purple-300">
+                    Create AI agents to automate your workflow. Click any folder and hit the + button to add an agent.
+                  </p>
                             </div>
                           </div>
                         </div>
-                      ))}
-                  </CardContent>
-                </Card>
-              )}
 
-              {/* File Content */}
-              {selectedFile.type === 'file' && selectedFile.content && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">File Content</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
-                      {selectedFile.content}
-                    </pre>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* File Metadata */}
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle className="text-base">Metadata</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="text-slate-600">Type:</div>
-                    <div className="font-medium">{selectedFile.type}</div>
-                    
-                    {selectedFile.metadata.extension && (
-                      <>
-                        <div className="text-slate-600">Extension:</div>
-                        <div className="font-medium">.{selectedFile.metadata.extension}</div>
-                      </>
-                    )}
-                    
-                    {selectedFile.metadata.size && (
-                      <>
-                        <div className="text-slate-600">Size:</div>
-                        <div className="font-medium">
-                          {(selectedFile.metadata.size / 1024).toFixed(2)} KB
+            {/* Content */}
+            {isCreatingAgent && selectedFolder ? (
+              <div className="px-4 py-6 sm:px-6 lg:px-8">
+                <AgentCreator
+                  folder={selectedFolder}
+                  onSave={handleSaveAgent}
+                  onCancel={handleCancelCreate}
+                />
                         </div>
-                      </>
+            ) : (
+              <div className="px-4 py-10 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl text-center">
+                  <SparklesIcon className="size-16 mx-auto mb-6 text-purple-500 opacity-80" />
+                  <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    Create Your First Agent
+                  </h1>
+                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                    Select a folder from the sidebar and click the + button to create an agent, or browse templates to get started.
+                  </p>
+                  <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      onClick={() => setShowTemplates(true)}
+                      className="inline-flex items-center rounded-md bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 dark:bg-purple-500 dark:hover:bg-purple-400"
+                    >
+                      <Cog6ToothIcon className="size-5 mr-2" />
+                      Browse Templates
+                    </button>
+                    {selectedFolder && (
+                      <button
+                        onClick={() => handleAddAgent(selectedFolder)}
+                        className="inline-flex items-center rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+                      >
+                        <PlusIcon className="size-5 mr-2" />
+                        Create Custom Agent
+                      </button>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Stats */}
+                  <dl className="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-3">
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Agents</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        {totalAgentsCount}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Active Agents</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        {enabledAgentsCount}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Active Folders</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        {new Set(agents.map(a => a.folderPath)).size}
+                      </dd>
+                    </div>
+                  </dl>
             </div>
-          ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                <p className="font-medium">Select a file to view details</p>
-                <p className="text-sm">Click on any file in the sidebar</p>
+              </div>
+            )}
               </div>
             </div>
-          )}
         </main>
 
-        {/* Right Sidebar - Compliance or Templates */}
-        <aside className="w-80 border-l bg-background overflow-hidden flex flex-col">
+      {/* Right sidebar */}
+      <aside className="fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 xl:block dark:border-white/10">
           {showTemplates ? (
-            <RuleTemplatesPanel
-              templates={RuleTemplates}
-              onSelectTemplate={(template) => {
-                // Add rule from template
-                const newRule: Rule = {
-                  id: `rule-${Date.now()}`,
-                  workspaceId: workspace.id,
-                  name: template.name,
-                  description: template.description,
-                  type: template.type,
-                  severity: 'warning',
-                  enabled: true,
-                  config: template.config,
-                  scope: { applyToAll: true },
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                  createdBy: 'demo-user',
-                };
-                setRules([...rules, newRule]);
-                setShowTemplates(false);
-              }}
+          <AgentTemplatesPanel
+            templates={getAgentTemplates()}
+            onSelectTemplate={handleSelectTemplate}
+            onClose={() => setShowTemplates(false)}
             />
           ) : (
-            <CompliancePanel
-              violations={violations}
-              onViolationClick={(violation) => {
-                // Find and select the file with this violation
-                const files = extractAllFiles(fileTree);
-                const file = files.find(f => f.id === violation.fileNodeId);
-                if (file) {
-                  setSelectedFile(file);
-                }
-              }}
+          <AgentListPanel
+            folder={selectedFolder}
+            agents={agents}
+            onAddAgent={selectedFolder ? () => handleAddAgent(selectedFolder) : undefined}
+            onEditAgent={handleEditAgent}
+            onDeleteAgent={handleDeleteAgent}
+            onToggleAgent={handleToggleAgent}
+            onRunAgent={handleRunAgent}
             />
           )}
         </aside>
-      </div>
-
-      {/* Active Rules Footer */}
-      <footer className="border-t bg-muted px-4 py-2">
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-muted-foreground font-medium">Active Rules:</span>
-          {rules.filter(r => r.enabled).map(rule => (
-            <Badge key={rule.id} variant="outline" className="text-xs text-black">
-              {rule.name}
-            </Badge>
-          ))}
-        </div>
-      </footer>
     </div>
   );
 }
-

@@ -10,6 +10,7 @@ runConfig:
 # Build configuration
 buildConfig:
   nodeVersion: 20
+  rootDirectory: apps/web
 
 # Environment variables and secrets.
 env:

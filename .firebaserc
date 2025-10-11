@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "avahosting"
+  },
+  "targets": {
+    "avahosting": {
+      "apphosting": {
+        "ava-web": [
+          "ava-web"
+        ]
+      }
+    }
+  }
+}

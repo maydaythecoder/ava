@@ -1,0 +1,66 @@
+# Settings for Backend (on Cloud Run).
+# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 2
+  memoryMiB: 1024
+
+# Environment variables and secrets.
+env:
+  # Supabase Configuration (public keys - safe to expose)
+  - variable: NEXT_PUBLIC_SUPABASE_URL
+    value: https://gkzzuaotffudipbpqukr.supabase.co
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_SUPABASE_ANON_KEY
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrenp1YW90ZmZ1ZGlwYnBxdWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxODM0NjcsImV4cCI6MjA3NTc1OTQ2N30._hT9bd5WdiVHinmHhgYFNrDj0bGsvjN00IOYnFtg8V0
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  # Firebase Configuration (public keys - safe to expose)
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyCNZZY3Wo0GyIv-zKdkDzgHNkbBQDhE46o
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: avahosting.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: avahosting
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: avahosting.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "587884587355"
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:587884587355:web:aa1f5de0a6fc3fd1ac527e
+    availability:
+      - BUILD
+      - RUNTIME
+  
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-HQVK7X2BRY
+    availability:
+      - BUILD
+      - RUNTIME

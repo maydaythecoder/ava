@@ -5,8 +5,8 @@
   "description": "Ava - Compliance-aware workspace and task management platform",
   "scripts": {
     "dev": "pnpm --parallel run dev",
-    "build": "pnpm -r --filter='@ava/web^...' run build && cd apps/web && pnpm run build",
-    "start": "cd apps/web && pnpm run start",
+    "build": "cd packages/common-types && pnpm build && cd ../git-bridge && pnpm build && cd ../ai-service && pnpm build && cd ../rules-engine && pnpm build && cd ../workflow-parser && pnpm build && cd ../../apps/web && pnpm build",
+    "start": "cd apps/web && pnpm start",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "clean": "pnpm -r run clean && rm -rf node_modules",

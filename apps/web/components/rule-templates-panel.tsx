@@ -50,7 +50,7 @@ export function RuleTemplatesPanel({ templates, onSelectTemplate }: RuleTemplate
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-xs whitespace-nowrap">
+                      <Badge variant="outline" className="text-xs whitespace-nowrap text-black">
                         {template.type}
                       </Badge>
                     </div>

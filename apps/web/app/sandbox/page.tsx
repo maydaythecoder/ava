@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { createDemoFileTree, createDemoRules, createDemoWorkspace } from '@/lib/demo-data';
 import { Play, Settings, FileText, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function SandboxPage() {
   const [workspace] = useState(createDemoWorkspace);
@@ -73,12 +74,12 @@ export default function SandboxPage() {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white px-4 py-3 flex items-center justify-between">
+      <header className="border-b bg-background px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-xl font-bold text-slate-900">
             Ava
           </Link>
-          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+          <Badge variant="outline" className="bg-purple-50 text-black border-purple-200">
             Sandbox Mode
           </Badge>
           <span className="text-sm text-slate-600">{workspace.name}</span>
@@ -93,6 +94,7 @@ export default function SandboxPage() {
             <Settings size={16} className="mr-2" />
             Rule Templates
           </Button>
+          <ThemeToggle />
           <Button
             size="sm"
             onClick={runComplianceCheck}
@@ -105,14 +107,14 @@ export default function SandboxPage() {
       </header>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+      <div className="bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-900 px-4 py-3">
         <div className="flex items-start gap-3">
-          <AlertCircle size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
+          <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="flex-1 text-sm">
-            <p className="text-blue-900 font-medium mb-1">
+            <p className="text-blue-900 dark:text-blue-100 font-medium mb-1">
               Welcome to Ava Sandbox!
             </p>
-            <p className="text-blue-700">
+            <p className="text-blue-700 dark:text-blue-300">
               This is a safe environment to explore compliance rules. Try clicking files to see violations,
               or add new rules from templates. Nothing here affects real data.
             </p>
@@ -123,9 +125,9 @@ export default function SandboxPage() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* File Tree Sidebar */}
-        <aside className="w-64 border-r bg-slate-50 overflow-y-auto">
-          <div className="p-3 border-b bg-white">
-            <h2 className="font-semibold text-sm text-slate-700">Files</h2>
+        <aside className="w-64 border-r bg-muted overflow-y-auto">
+          <div className="p-3 border-b bg-background">
+            <h2 className="font-semibold text-sm">Files</h2>
           </div>
           <div className="p-2">
             <FileTree
@@ -146,7 +148,7 @@ export default function SandboxPage() {
                   <FileText size={20} className="text-slate-600" />
                   <h1 className="text-xl font-semibold">{selectedFile.name}</h1>
                   {violationsByFile[selectedFile.id] && (
-                    <Badge variant="warning">
+                    <Badge variant="warning" className="text-black">
                       {violationsByFile[selectedFile.id]} issue{violationsByFile[selectedFile.id] > 1 ? 's' : ''}
                     </Badge>
                   )}
@@ -158,12 +160,12 @@ export default function SandboxPage() {
               {violations.filter(v => v.fileNodeId === selectedFile.id).length > 0 && (
                 <Card className="mb-4 border-orange-200 bg-orange-50">
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-black flex items-center gap-2">
                       <AlertCircle size={18} className="text-orange-600" />
                       Compliance Issues
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 text-slate-600">
                     {violations
                       .filter(v => v.fileNodeId === selectedFile.id)
                       .map(violation => (
@@ -174,6 +176,7 @@ export default function SandboxPage() {
                                 violation.severity === 'error' ? 'destructive' :
                                 violation.severity === 'warning' ? 'warning' : 'info'
                               }
+                              className="text-black"
                             >
                               {violation.severity}
                             </Badge>
@@ -236,7 +239,7 @@ export default function SandboxPage() {
               </Card>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-slate-500">
+            <div className="h-full flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <FileText size={48} className="mx-auto mb-4 opacity-50" />
                 <p className="font-medium">Select a file to view details</p>
@@ -247,7 +250,7 @@ export default function SandboxPage() {
         </main>
 
         {/* Right Sidebar - Compliance or Templates */}
-        <aside className="w-80 border-l bg-white overflow-hidden flex flex-col">
+        <aside className="w-80 border-l bg-background overflow-hidden flex flex-col">
           {showTemplates ? (
             <RuleTemplatesPanel
               templates={RuleTemplates}
@@ -288,11 +291,11 @@ export default function SandboxPage() {
       </div>
 
       {/* Active Rules Footer */}
-      <footer className="border-t bg-slate-50 px-4 py-2">
+      <footer className="border-t bg-muted px-4 py-2">
         <div className="flex items-center gap-4 text-sm">
-          <span className="text-slate-600 font-medium">Active Rules:</span>
+          <span className="text-muted-foreground font-medium">Active Rules:</span>
           {rules.filter(r => r.enabled).map(rule => (
-            <Badge key={rule.id} variant="outline" className="text-xs">
+            <Badge key={rule.id} variant="outline" className="text-xs text-black">
               {rule.name}
             </Badge>
           ))}

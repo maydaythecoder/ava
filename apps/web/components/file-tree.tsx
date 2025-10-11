@@ -84,7 +84,7 @@ function TreeNode({ node, onSelectFile, selectedFileId, violations, depth }: Fil
         </span>
         
         {hasViolations && (
-          <Badge variant="warning" className="ml-2">
+          <Badge variant="warning" className="ml-2 text-black">
             {violationCount}
           </Badge>
         )}

@@ -18,18 +18,18 @@ export function CompliancePanel({ violations, onViolationClick }: CompliancePane
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b">
-        <h2 className="font-semibold text-lg mb-3">Compliance Issues</h2>
+        <h2 className="font-semibold text-lg mb-3 ">Compliance Issues</h2>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
-            <Badge variant="destructive">{errorCount}</Badge>
+            <Badge variant="destructive" className="text-black">{errorCount}</Badge>
             <span className="text-sm text-slate-600">Errors</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="warning">{warningCount}</Badge>
+            <Badge variant="warning" className="text-black">{warningCount}</Badge>
             <span className="text-sm text-slate-600">Warnings</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="info">{infoCount}</Badge>
+            <Badge variant="info" className="text-black">{infoCount}</Badge>
             <span className="text-sm text-slate-600">Info</span>
           </div>
         </div>
@@ -67,7 +67,7 @@ export function CompliancePanel({ violations, onViolationClick }: CompliancePane
                       violation.severity === 'error' ? 'destructive' :
                       violation.severity === 'warning' ? 'warning' : 'info'
                     }
-                    className="text-xs"
+                    className="text-xs text-black"
                   >
                     {violation.severity}
                   </Badge>

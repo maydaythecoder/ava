@@ -107,7 +107,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -155,7 +155,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
             placeholder="E.g., Review code changes for security vulnerabilities and best practices..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            className="w-full min-h-[120px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full min-h-[100px] sm:min-h-[120px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </CardContent>
       </Card>
@@ -171,7 +171,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
             placeholder="E.g., This API handles sensitive user data. All endpoints must be secured..."
             value={context}
             onChange={(e) => setContext(e.target.value)}
-            className="w-full min-h-[80px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full min-h-[80px] sm:min-h-[80px] p-3 text-sm border rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </CardContent>
       </Card>
@@ -277,13 +277,13 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
           <CardDescription>Choose when this agent should be triggered</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {(['on_commit', 'hourly', 'daily', 'on_change', 'manual'] as const).map((type) => (
               <button
                 key={type}
                 onClick={() => setTriggerType(type)}
                 className={`
-                  px-4 py-3 text-sm font-medium rounded-md border-2 transition-all
+                  px-4 py-3 text-sm font-medium rounded-md border-2 transition-all w-full min-h-[44px]
                   ${triggerType === type
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border hover:border-primary/50'
@@ -304,7 +304,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
           <CardDescription>Define where this agent operates</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {(['all', 'paths', 'types'] as const).map((type) => (
               <button
                 key={type}
@@ -312,8 +312,8 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
                 onClick={() => setScopeType(type)}
                 className={
                   scopeType === type
-                    ? 'inline-flex items-center rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400'
-                    : 'inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20'
+                    ? 'inline-flex items-center justify-center rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400 flex-1 min-h-[44px]'
+                    : 'inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20 flex-1 min-h-[44px]'
                 }
               >
                 {type === 'all' ? 'All Files' : type === 'paths' ? 'Specific Paths' : 'File Types'}

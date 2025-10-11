@@ -55,7 +55,7 @@ export function AgentTemplatesPanel({
               {categoryTemplates.map(template => (
                 <Card
                   key={template.id}
-                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  className="hover:shadow-md active:shadow-lg transition-shadow cursor-pointer active:scale-[0.98]"
                   onClick={() => onSelectTemplate(template)}
                 >
                   <CardHeader className="pb-3">

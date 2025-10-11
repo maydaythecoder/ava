@@ -5,7 +5,7 @@
  * Visualizes GitHub Actions workflows as interactive diagrams
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { ParsedWorkflow } from '@ava/workflow-parser';
 
@@ -26,11 +26,30 @@ interface Link {
   target: string;
 }
 
-export function WorkflowVisualizer({ workflow, width = 800, height = 600 }: WorkflowVisualizerProps) {
+export function WorkflowVisualizer({ workflow, width, height }: WorkflowVisualizerProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setDimensions({ 
+        width: width || 800, 
+        height: Math.max(height || 600, 400) 
+      });
+    });
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current || !workflow) return;
+
+    const svgWidth = width || dimensions.width;
+    const svgHeight = height || dimensions.height;
+    const nodeRadius = svgWidth < 640 ? 15 : 20;
 
     // Clear previous visualization
     d3.select(svgRef.current).selectAll('*').remove();
@@ -78,9 +97,9 @@ export function WorkflowVisualizer({ workflow, width = 800, height = 600 }: Work
     // Create SVG
     const svg = d3
       .select(svgRef.current)
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [0, 0, width, height]);
+      .attr('width', svgWidth)
+      .attr('height', svgHeight)
+      .attr('viewBox', [0, 0, svgWidth, svgHeight]);
 
     // Create force simulation
     const simulation = d3
@@ -93,7 +112,7 @@ export function WorkflowVisualizer({ workflow, width = 800, height = 600 }: Work
           .distance(100)
       )
       .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('center', d3.forceCenter(svgWidth / 2, svgHeight / 2))
       .force('collision', d3.forceCollide().radius(50));
 
     // Create links
@@ -138,7 +157,7 @@ export function WorkflowVisualizer({ workflow, width = 800, height = 600 }: Work
     // Add circles for nodes
     node
       .append('circle')
-      .attr('r', 20)
+      .attr('r', nodeRadius)
       .attr('fill', (d) => {
         if (d.type === 'trigger') return '#8b5cf6';
         if (d.type === 'job') return '#3b82f6';
@@ -227,10 +246,10 @@ export function WorkflowVisualizer({ workflow, width = 800, height = 600 }: Work
     return () => {
       simulation.stop();
     };
-  }, [workflow, width, height]);
+  }, [workflow, width, height, dimensions]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-white/10 p-4">
+    <div ref={containerRef} className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-white/10 p-4">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           {workflow.name || 'Workflow Visualization'}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
 import {
   Bars3Icon,
@@ -136,10 +137,9 @@ export default function SandboxPage() {
             </TransitionChild>
 
             <div className="relative flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-r dark:before:border-white/10 dark:before:bg-black/10">
-            <div className="relative flex h-16 shrink-0 items-center">
-              <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            <Link href="/" className="relative flex h-16 shrink-0 items-center hover:opacity-80 transition-opacity">
               <span className={`ml-2 text-xl font-bold dark:text-white ${gugi.className}`}>AVA</span>
-            </div>
+            </Link>
               <nav className="relative flex flex-1 flex-col">
                 <div className="flex-1">
                   <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3">PROJECT STRUCTURE</h2>
@@ -160,13 +160,12 @@ export default function SandboxPage() {
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
         <div className="relative flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
-          <div className="relative flex h-16 shrink-0 items-center">
-            <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+          <Link href="/" className="relative flex h-16 shrink-0 items-center hover:opacity-80 transition-opacity">
             <span className={`ml-2 text-xl font-bold text-gray-900 dark:text-white ${gugi.className}`}>AVA</span>
             <Badge variant="outline" className="ml-3 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
               Sandbox
             </Badge>
-          </div>
+          </Link>
           <nav className="relative flex flex-1 flex-col">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-3">
@@ -205,10 +204,9 @@ export default function SandboxPage() {
           <span className="sr-only">Open sidebar</span>
           <Bars3Icon aria-hidden="true" className="size-6" />
         </button>
-        <div className="relative flex-1 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          <span className={gugi.className}>AVA</span> Sandbox
-          </div>
+        <Link href="/" className="relative flex-1 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity">
+          <span className={`${gugi.className} truncate`}>AVA Sandbox</span>
+        </Link>
         <button
           onClick={() => setShowTemplates(!showTemplates)}
           aria-label="Toggle settings"

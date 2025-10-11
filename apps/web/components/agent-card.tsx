@@ -54,7 +54,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
               <span className="text-2xl">{getAgentTypeIcon(agent.type)}</span>
               {agent.name}
             </CardTitle>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               <Badge variant={agent.enabled ? 'default' : 'secondary'} className="text-xs">
                 {agent.enabled ? 'Enabled' : 'Disabled'}
               </Badge>
@@ -76,9 +76,9 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 size="sm"
                 onClick={() => onRun(agent)}
                 title="Run now"
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 sm:h-8 sm:w-8 p-0"
               >
-                <PlayIcon className="size-4" />
+                <PlayIcon className="size-5 sm:size-4" />
               </Button>
             )}
             {onToggle && (
@@ -87,9 +87,9 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 size="sm"
                 onClick={() => onToggle(agent)}
                 title={agent.enabled ? 'Disable' : 'Enable'}
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 sm:h-8 sm:w-8 p-0"
               >
-                {agent.enabled ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
+                {agent.enabled ? <PauseIcon className="size-5 sm:size-4" /> : <PlayIcon className="size-5 sm:size-4" />}
               </Button>
             )}
             {onEdit && (
@@ -98,9 +98,9 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 size="sm"
                 onClick={() => onEdit(agent)}
                 title="Edit"
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 sm:h-8 sm:w-8 p-0"
               >
-                <PencilIcon className="size-4" />
+                <PencilIcon className="size-5 sm:size-4" />
               </Button>
             )}
             {onDelete && (
@@ -109,9 +109,9 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 size="sm"
                 onClick={() => onDelete(agent)}
                 title="Delete"
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                className="h-10 w-10 sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive"
               >
-                <TrashIcon className="size-4" />
+                <TrashIcon className="size-5 sm:size-4" />
               </Button>
             )}
           </div>
@@ -124,7 +124,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
           <FolderOpenIcon className="size-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <div className="font-medium text-xs text-muted-foreground mb-1">Location</div>
-            <code className="text-xs bg-muted px-2 py-1 rounded">{agent.folderPath}/{agent.fileName}</code>
+            <code className="text-xs bg-muted px-2 py-1 rounded block truncate max-w-full" title={`${agent.folderPath}/${agent.fileName}`}>{agent.folderPath}/{agent.fileName}</code>
           </div>
         </div>
 

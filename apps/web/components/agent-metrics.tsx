@@ -43,7 +43,7 @@ export function AgentMetrics({ agentName }: AgentMetricsProps) {
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
         <AreaChart data={mockData}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-white/10" />
           <XAxis
@@ -92,7 +92,7 @@ export function AgentMetrics({ agentName }: AgentMetricsProps) {
         </AreaChart>
       </ResponsiveContainer>
 
-      <div className="mt-6 grid grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">117</div>
           <div className="text-sm text-gray-600 dark:text-gray-400">Total Executions</div>

@@ -55,17 +55,29 @@
   padding-left: calc(attr(data-depth number, 0) * 12px + 8px);
 }
 
-/* Fallback for browsers that don't support attr() with numbers */
+/* Fallback for browsers that don't support attr() with numbers - Mobile responsive */
 .tree-node[data-depth="0"] { padding-left: 8px; }
-.tree-node[data-depth="1"] { padding-left: 20px; }
-.tree-node[data-depth="2"] { padding-left: 32px; }
-.tree-node[data-depth="3"] { padding-left: 44px; }
-.tree-node[data-depth="4"] { padding-left: 56px; }
-.tree-node[data-depth="5"] { padding-left: 68px; }
-.tree-node[data-depth="6"] { padding-left: 80px; }
-.tree-node[data-depth="7"] { padding-left: 92px; }
-.tree-node[data-depth="8"] { padding-left: 104px; }
-.tree-node[data-depth="9"] { padding-left: 116px; }
+.tree-node[data-depth="1"] { padding-left: 16px; }
+.tree-node[data-depth="2"] { padding-left: 28px; }
+.tree-node[data-depth="3"] { padding-left: 40px; }
+.tree-node[data-depth="4"] { padding-left: 52px; }
+.tree-node[data-depth="5"] { padding-left: 64px; }
+.tree-node[data-depth="6"] { padding-left: 76px; }
+.tree-node[data-depth="7"] { padding-left: 88px; }
+.tree-node[data-depth="8"] { padding-left: 100px; }
+.tree-node[data-depth="9"] { padding-left: 112px; }
+
+@media (min-width: 640px) {
+  .tree-node[data-depth="1"] { padding-left: 20px; }
+  .tree-node[data-depth="2"] { padding-left: 32px; }
+  .tree-node[data-depth="3"] { padding-left: 44px; }
+  .tree-node[data-depth="4"] { padding-left: 56px; }
+  .tree-node[data-depth="5"] { padding-left: 68px; }
+  .tree-node[data-depth="6"] { padding-left: 80px; }
+  .tree-node[data-depth="7"] { padding-left: 92px; }
+  .tree-node[data-depth="8"] { padding-left: 104px; }
+  .tree-node[data-depth="9"] { padding-left: 116px; }
+}
 
 /* Ensure placeholders inherit font inside Gugi scope */
 .gugi-font ::placeholder {

@@ -54,7 +54,7 @@ export function AgentListPanel({
         {!folder ? (
           <div className="h-full flex items-center justify-center text-center p-6">
             <div>
-              <SparklesIcon className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <SparklesIcon className="size-10 sm:size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="font-medium">Select a folder</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Choose a folder to view or create agents
@@ -64,7 +64,7 @@ export function AgentListPanel({
         ) : folderAgents.length === 0 ? (
           <div className="h-full flex items-center justify-center text-center p-6">
             <div>
-              <SparklesIcon className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <SparklesIcon className="size-10 sm:size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="font-medium">No agents yet</p>
               <p className="text-sm text-muted-foreground mt-1 mb-4">
                 Create an agent to automate tasks in this folder

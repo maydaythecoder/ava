@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRightIcon, ChevronDownIcon, FolderIcon, FolderOpenIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { FolderNode, Agent } from '@/store/agent-store';
 import { Badge } from './ui/badge';
@@ -56,7 +56,15 @@ function FolderTreeNode({
   level
 }: FolderTreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(level < 2);
+  const [isMobile, setIsMobile] = useState(false);
   const isSelected = node.id === selectedFolderId;
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const agentCount = agents.filter(a => a.folderPath === node.path).length;
   
@@ -79,22 +87,31 @@ function FolderTreeNode({
 
   return (
     <div>
-      <button
+      <div
         onClick={handleSelect}
+        role="button"
+        tabIndex={0}
         aria-label={`Select ${node.name}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleSelect();
+          }
+        }}
         className={classNames(
           isSelected
             ? 'bg-gray-50 text-purple-600 dark:bg-white/5 dark:text-white'
             : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white',
-          'group flex w-full items-center gap-x-2 rounded-md p-2 text-sm font-medium transition-colors'
+          'group flex w-full items-center gap-x-2 rounded-md p-2 text-sm font-medium transition-colors cursor-pointer'
         )}
-        // Dynamic padding based on nesting level - inline style necessary for dynamic calculation
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
+        // Dynamic padding based on nesting level - responsive to mobile
+        style={{ paddingLeft: `${level * (isMobile ? 8 : 12) + 8}px` }}
       >
         {node.children && node.children.length > 0 && (
           <button
             onClick={handleToggle}
             className="p-0 hover:bg-transparent flex-shrink-0"
+            aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
             {isExpanded ? (
               <ChevronDownIcon className="size-4 text-gray-400 dark:text-gray-500" />
@@ -127,7 +144,7 @@ function FolderTreeNode({
         <span className="flex-1 truncate text-left">{node.name}</span>
         
         {agentCount > 0 && (
-          <span className="ml-auto inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 outline-1 -outline-offset-1 outline-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:outline-white/10">
+          <span className="ml-auto inline-flex items-center rounded-full bg-gray-50 px-1.5 sm:px-2 py-0.5 text-xs font-medium text-gray-600 outline-1 -outline-offset-1 outline-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:outline-white/10">
             {agentCount}
           </span>
         )}
@@ -136,10 +153,11 @@ function FolderTreeNode({
           onClick={handleAddAgent}
           className="opacity-0 group-hover:opacity-100 ml-1 inline-flex items-center justify-center size-6 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-white dark:hover:bg-white/10 transition-all"
           title="Add agent"
+          aria-label={`Add agent to ${node.name}`}
         >
           <PlusIcon className="size-4" />
         </button>
-      </button>
+      </div>
       
       {isExpanded && node.children && node.children.length > 0 && (
         <div>

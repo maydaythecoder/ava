@@ -1,25 +1,13 @@
 {
-  "apphosting": [
-    {
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "apps/cli",
-        "apps/electron"
-      ]
-    },
-    {
-      "backendId": "ava-web",
-      "rootDir": "./app/web",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "functions"
-      ]
-    }
-  ]
+  "apphosting": {
+    "backendId": "ava-web",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "apps/cli",
+      "apps/electron"
+    ]
+  }
 }

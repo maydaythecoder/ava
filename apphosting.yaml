@@ -22,9 +22,10 @@ env:
       - BUILD
       - RUNTIME
   
-  # Firebase Configuration (public keys - safe to expose)
+  # Firebase Configuration
+  # SECURITY: API key stored in Firebase App Hosting secret, not committed to git
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: AIzaSyCNZZY3Wo0GyIv-zKdkDzgHNkbBQDhE46o
+    secret: NEXT_PUBLIC_FIREBASE_API_KEY
     availability:
       - BUILD
       - RUNTIME

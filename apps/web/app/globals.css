@@ -70,3 +70,8 @@
 .tree-node[data-depth="7"] { padding-left: 92px; }
 .tree-node[data-depth="8"] { padding-left: 104px; }
 .tree-node[data-depth="9"] { padding-left: 116px; }
+
+/* Ensure placeholders inherit font inside Gugi scope */
+.gugi-font ::placeholder {
+  font-family: inherit;
+}

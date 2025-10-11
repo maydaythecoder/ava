@@ -1,10 +1,15 @@
+"use client";
+
 import SplineComponent from "@/components/Spline";
 import { Gugi } from "next/font/google";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 const gugi = Gugi({ weight: "400", subsets: ["latin"] });
 
 export default function App() {
+  const { user } = useAuth();
+
   return (
     <>
     <div className={`${gugi.className} gugi-font overflow-hidden h-screen z-10 relative`}>
@@ -14,9 +19,14 @@ export default function App() {
       </span>
       
       {/* Sandbox and Sign up on top right */}
-      <span className="bg-transparent z-20 absolute top-4 right-4 text-right">
-        <Link href="/sandbox" className="text-md text-gray-700">Sandbox</Link>
-        <p className="text-md text-gray-600">Sign up</p>
+      <span className="bg-transparent z-20 absolute top-4 right-4 flex gap-4 text-right">
+        {!user && (
+          <>
+            <Link href="/login" className="text-md text-gray-700 hover:text-gray-900">Login</Link>
+            <Link href="/signup" className="text-md text-gray-700 hover:text-gray-900">Sign up</Link>
+          </>
+        )}
+        <Link href="/sandbox" className="text-md text-gray-700 hover:text-gray-900">Sandbox</Link>
       </span>
       
       {/* Caption above email input */}

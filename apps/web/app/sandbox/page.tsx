@@ -9,6 +9,7 @@ import {
   SparklesIcon,
   Cog6ToothIcon,
   PlusIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { Agent, FolderNode } from '@/store/agent-store';
 import { FolderTreeWithAgents } from '@/components/folder-tree-with-agents';
@@ -23,11 +24,13 @@ import {
   getAgentTemplates,
   AgentTemplate
 } from '@/lib/agent-demo-data';
+import { useAuth } from '@/lib/auth-context';
 import { Gugi } from 'next/font/google';
 
 const gugi = Gugi({ weight: '400', subsets: ['latin'] });
 
 export default function SandboxPage() {
+  const { user, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [folderTree] = useState<FolderNode>(createDemoFolderTree());
   const [agents, setAgents] = useState<Agent[]>(createDemoAgents());
@@ -151,6 +154,28 @@ export default function SandboxPage() {
                     selectedFolderId={selectedFolder?.id}
                   />
                 </div>
+                <div className="-mx-6 mt-auto border-t border-gray-200 dark:border-white/10">
+                  <div className="flex items-center gap-x-4 px-6 py-3 text-sm">
+                    <span className="size-8 rounded-full bg-gray-50 flex items-center justify-center outline-1 -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10">
+                      <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                        {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                        {user?.email || 'User'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{workspaceName}</p>
+                    </div>
+                    <button
+                      onClick={signOut}
+                      className="rounded-md p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      title="Sign out"
+                    >
+                      <ArrowRightOnRectangleIcon className="size-5" />
+                    </button>
+                  </div>
+                </div>
               </nav>
             </div>
           </DialogPanel>
@@ -183,11 +208,25 @@ export default function SandboxPage() {
               />
             </div>
             <div className="-mx-6 mt-auto border-t border-gray-200 dark:border-white/10">
-              <div className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold text-gray-900 dark:text-white">
+              <div className="flex items-center gap-x-4 px-6 py-3 text-sm">
                 <span className="size-8 rounded-full bg-gray-50 flex items-center justify-center outline-1 -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10">
-                  <span className="text-xs">DC</span>
+                  <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
                 </span>
-                <span aria-hidden="true">{workspaceName}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                    {user?.email || 'User'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{workspaceName}</p>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="rounded-md p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  title="Sign out"
+                >
+                  <ArrowRightOnRectangleIcon className="size-5" />
+                </button>
               </div>
             </div>
           </nav>

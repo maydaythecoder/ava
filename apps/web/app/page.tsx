@@ -1,5 +1,6 @@
 import SplineComponent from "@/components/Spline";
 import { Gugi } from "next/font/google";
+import Link from "next/link";
 
 const gugi = Gugi({ weight: "400", subsets: ["latin"] });
 
@@ -14,7 +15,7 @@ export default function App() {
       
       {/* Sandbox and Sign up on top right */}
       <span className="bg-transparent z-20 absolute top-4 right-4 text-right">
-        <h2 className="text-md text-gray-700">Sandbox</h2>
+        <Link href="/sandbox" className="text-md text-gray-700">Sandbox</Link>
         <p className="text-md text-gray-600">Sign up</p>
       </span>
       

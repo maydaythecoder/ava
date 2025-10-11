@@ -1,122 +1,156 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { FileTreeNode, RuleViolation, Rule } from '@ava/common-types';
-import { RulesEngine } from '@ava/rules-engine';
-import { RuleTemplates } from '@ava/rules-engine';
-import { FileTree } from '@/components/file-tree';
-import { CompliancePanel } from '@/components/compliance-panel';
-import { RuleTemplatesPanel } from '@/components/rule-templates-panel';
+import { useState } from 'react';
+import { Agent, FolderNode } from '@/store/agent-store';
+import { FolderTreeWithAgents } from '@/components/folder-tree-with-agents';
+import { AgentCreator } from '@/components/agent-creator';
+import { AgentListPanel } from '@/components/agent-list-panel';
+import { AgentTemplatesPanel } from '@/components/agent-templates-panel';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { createDemoFileTree, createDemoRules, createDemoWorkspace } from '@/lib/demo-data';
-import { Play, Settings, FileText, AlertCircle } from 'lucide-react';
+import { Sparkles, Settings, FolderTree, Play } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  createDemoWorkspaceId,
+  createDemoFolderTree,
+  createDemoAgents,
+  getAgentTemplates,
+  AgentTemplate
+} from '@/lib/agent-demo-data';
 
 export default function SandboxPage() {
-  const [workspace] = useState(createDemoWorkspace);
-  const [fileTree] = useState<FileTreeNode>(createDemoFileTree);
-  const [rules, setRules] = useState<Rule[]>(createDemoRules);
-  const [selectedFile, setSelectedFile] = useState<FileTreeNode | null>(null);
-  const [violations, setViolations] = useState<RuleViolation[]>([]);
-  const [isChecking, setIsChecking] = useState(false);
+  // Initialize with demo data
+  const [folderTree] = useState<FolderNode>(createDemoFolderTree());
+  const [agents, setAgents] = useState<Agent[]>(createDemoAgents());
+  const [selectedFolder, setSelectedFolder] = useState<FolderNode | null>(null);
+  const [isCreatingAgent, setIsCreatingAgent] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [workspaceName] = useState('Demo Workspace');
 
-  // Extract all files from tree (flatten)
-  const extractAllFiles = (node: FileTreeNode): FileTreeNode[] => {
-    const files: FileTreeNode[] = [];
-    
-    if (node.type === 'file') {
-      files.push(node);
-    }
-    
-    if (node.children) {
-      for (const child of node.children) {
-        files.push(...extractAllFiles(child));
-      }
-    }
-    
-    return files;
+  const handleAddAgent = (folder: FolderNode) => {
+    setSelectedFolder(folder);
+    setIsCreatingAgent(true);
+    setShowTemplates(false);
   };
 
-  // Run compliance check
-  const runComplianceCheck = async () => {
-    setIsChecking(true);
-    const engine = new RulesEngine();
+  const handleSaveAgent = (agentData: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newAgent: Agent = {
+      ...agentData,
+      id: `agent-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     
-    // Get all files from tree
-    const files = extractAllFiles(fileTree);
-    
-    // Check files
-    const result = await engine.checkFiles(files, rules);
-    setViolations(result.violations);
-    
-    setIsChecking(false);
+    setAgents([...agents, newAgent]);
+    setIsCreatingAgent(false);
   };
 
-  // Calculate violations per file
-  const violationsByFile = useMemo(() => {
-    const map: Record<string, number> = {};
-    violations.forEach(v => {
-      map[v.fileNodeId] = (map[v.fileNodeId] || 0) + 1;
-    });
-    return map;
-  }, [violations]);
+  const handleCancelCreate = () => {
+    setIsCreatingAgent(false);
+  };
 
-  // Auto-run check when rules or files change
-  useEffect(() => {
-    void runComplianceCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rules, fileTree]);
+  const handleSelectFolder = (folder: FolderNode) => {
+    setSelectedFolder(folder);
+    setIsCreatingAgent(false);
+  };
+
+  const handleEditAgent = (agent: Agent) => {
+    // TODO: Implement edit mode
+    console.log('Edit agent:', agent);
+  };
+
+  const handleDeleteAgent = (agent: Agent) => {
+    if (confirm(`Are you sure you want to delete "${agent.name}"?`)) {
+      setAgents(agents.filter(a => a.id !== agent.id));
+    }
+  };
+
+  const handleToggleAgent = (agent: Agent) => {
+    setAgents(agents.map(a =>
+      a.id === agent.id ? { ...a, enabled: !a.enabled, updatedAt: new Date() } : a
+    ));
+  };
+
+  const handleRunAgent = (agent: Agent) => {
+    alert(`Running agent: ${agent.name}\n\nThis would trigger the agent execution in production.`);
+  };
+
+  const handleSelectTemplate = (template: AgentTemplate) => {
+    if (!selectedFolder) {
+      alert('Please select a folder first');
+      return;
+    }
+
+    // Pre-fill agent creator with template data
+    const templateAgent: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'> = {
+      workspaceId: createDemoWorkspaceId(),
+      folderPath: selectedFolder.path,
+      name: template.name,
+      fileName: `${template.name.toLowerCase().replace(/\s+/g, '-')}.ava`,
+      prompt: template.promptTemplate,
+      context: template.contextTemplate,
+      contextLinks: [],
+      contextMcpServers: [],
+      triggerType: template.defaultTrigger,
+      triggerConfig: {},
+      scope: { applyToAll: true },
+      type: template.type,
+      enabled: true,
+      createdBy: 'current-user'
+    };
+
+    handleSaveAgent(templateAgent);
+    setShowTemplates(false);
+  };
+
+  const enabledAgentsCount = agents.filter(a => a.enabled).length;
+  const totalAgentsCount = agents.length;
 
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b bg-background px-4 py-3 flex items-center justify-between">
+      <header className="border-b bg-background px-4 py-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-xl font-bold text-slate-900">
+          <Link href="/" className="text-xl font-bold text-slate-900 dark:text-slate-100">
             Ava
           </Link>
-          <Badge variant="outline" className="bg-purple-50 text-black border-purple-200">
+          <Badge variant="outline" className="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
             Sandbox Mode
           </Badge>
-          <span className="text-sm text-slate-600">{workspace.name}</span>
+          <span className="text-sm text-slate-600 dark:text-slate-400">{workspaceName}</span>
         </div>
         
         <div className="flex items-center gap-2">
+          <div className="text-sm text-muted-foreground mr-2">
+            <span className="font-medium">{enabledAgentsCount}</span> / {totalAgentsCount} agents active
+          </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowTemplates(!showTemplates)}
+            onClick={() => {
+              setShowTemplates(!showTemplates);
+              setIsCreatingAgent(false);
+            }}
           >
             <Settings size={16} className="mr-2" />
-            Rule Templates
+            Templates
           </Button>
           <ThemeToggle />
-          <Button
-            size="sm"
-            onClick={runComplianceCheck}
-            disabled={isChecking}
-          >
-            <Play size={16} className="mr-2" />
-            {isChecking ? 'Checking...' : 'Run Check'}
-          </Button>
         </div>
       </header>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-900 px-4 py-3">
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-b border-purple-200 dark:border-purple-900 px-4 py-3 flex-shrink-0">
         <div className="flex items-start gap-3">
-          <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+          <Sparkles size={18} className="text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
           <div className="flex-1 text-sm">
-            <p className="text-blue-900 dark:text-blue-100 font-medium mb-1">
-              Welcome to Ava Sandbox!
+            <p className="text-purple-900 dark:text-purple-100 font-medium mb-1">
+              Welcome to Ava Agent Studio!
             </p>
-            <p className="text-blue-700 dark:text-blue-300">
-              This is a safe environment to explore compliance rules. Try clicking files to see violations,
-              or add new rules from templates. Nothing here affects real data.
+            <p className="text-purple-700 dark:text-purple-300">
+              Create AI agents to automate your workflow. Click any folder and hit the + button to add an agent, 
+              or use templates to get started quickly. Agents run based on triggers you define.
             </p>
           </div>
         </div>
@@ -124,184 +158,130 @@ export default function SandboxPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* File Tree Sidebar */}
-        <aside className="w-64 border-r bg-muted overflow-y-auto">
-          <div className="p-3 border-b bg-background">
-            <h2 className="font-semibold text-sm">Files</h2>
+        {/* Left Sidebar - Folder Tree */}
+        <aside className="w-80 border-r bg-muted/30 overflow-y-auto flex-shrink-0">
+          <div className="p-3 border-b bg-background sticky top-0 z-10">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <FolderTree size={16} />
+              Project Structure
+            </h2>
           </div>
           <div className="p-2">
-            <FileTree
-              tree={fileTree}
-              onSelectFile={setSelectedFile}
-              selectedFileId={selectedFile?.id}
-              violations={violationsByFile}
+            <FolderTreeWithAgents
+              tree={folderTree}
+              agents={agents}
+              onSelectFolder={handleSelectFolder}
+              onAddAgent={handleAddAgent}
+              selectedFolderId={selectedFolder?.id}
             />
           </div>
         </aside>
 
-        {/* Center Content */}
-        <main className="flex-1 overflow-y-auto">
-          {selectedFile ? (
-            <div className="p-6">
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText size={20} className="text-slate-600" />
-                  <h1 className="text-xl font-semibold">{selectedFile.name}</h1>
-                  {violationsByFile[selectedFile.id] && (
-                    <Badge variant="warning" className="text-black">
-                      {violationsByFile[selectedFile.id]} issue{violationsByFile[selectedFile.id] > 1 ? 's' : ''}
-                    </Badge>
+        {/* Center Content - Agent Creator or Welcome */}
+        <main className="flex-1 overflow-y-auto bg-background">
+          {isCreatingAgent && selectedFolder ? (
+            <AgentCreator
+              folder={selectedFolder}
+              onSave={handleSaveAgent}
+              onCancel={handleCancelCreate}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-center p-6">
+              <div className="max-w-md">
+                <Sparkles size={64} className="mx-auto mb-6 text-purple-500 opacity-80" />
+                <h1 className="text-3xl font-bold mb-4">Create Your First Agent</h1>
+                <p className="text-muted-foreground mb-6">
+                  Select a folder from the tree on the left and click the + button to create an agent,
+                  or browse templates to get started with pre-built configurations.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button
+                    size="lg"
+                    onClick={() => setShowTemplates(true)}
+                    className="gap-2"
+                  >
+                    <Settings size={18} />
+                    Browse Templates
+                  </Button>
+                  {selectedFolder && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={() => handleAddAgent(selectedFolder)}
+                      className="gap-2"
+                    >
+                      <Play size={18} />
+                      Create Custom Agent
+                    </Button>
                   )}
-                </div>
-                <p className="text-sm text-slate-600">{selectedFile.path}</p>
               </div>
 
-              {/* File Violations */}
-              {violations.filter(v => v.fileNodeId === selectedFile.id).length > 0 && (
-                <Card className="mb-4 border-orange-200 bg-orange-50">
-                  <CardHeader>
-                    <CardTitle className="text-black flex items-center gap-2">
-                      <AlertCircle size={18} className="text-orange-600" />
-                      Compliance Issues
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-slate-600">
-                    {violations
-                      .filter(v => v.fileNodeId === selectedFile.id)
-                      .map(violation => (
-                        <div key={violation.id} className="bg-white rounded-lg p-3 border">
-                          <div className="flex items-start gap-2">
-                            <Badge
-                              variant={
-                                violation.severity === 'error' ? 'destructive' :
-                                violation.severity === 'warning' ? 'warning' : 'info'
-                              }
-                              className="text-black"
-                            >
-                              {violation.severity}
-                            </Badge>
-                            <div className="flex-1">
-                              <p className="font-medium text-sm mb-1">{violation.message}</p>
-                              {violation.context.suggestedFix && (
-                                <p className="text-xs text-slate-600">
-                                  💡 {violation.context.suggestedFix}
-                                </p>
-                              )}
+                {/* Quick Stats */}
+                <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t">
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{totalAgentsCount}</div>
+                    <div className="text-xs text-muted-foreground">Total Agents</div>
                             </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{enabledAgentsCount}</div>
+                    <div className="text-xs text-muted-foreground">Active</div>
                           </div>
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {new Set(agents.map(a => a.folderPath)).size}
                         </div>
-                      ))}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* File Content */}
-              {selectedFile.type === 'file' && selectedFile.content && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">File Content</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm">
-                      {selectedFile.content}
-                    </pre>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* File Metadata */}
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle className="text-base">Metadata</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="text-slate-600">Type:</div>
-                    <div className="font-medium">{selectedFile.type}</div>
-                    
-                    {selectedFile.metadata.extension && (
-                      <>
-                        <div className="text-slate-600">Extension:</div>
-                        <div className="font-medium">.{selectedFile.metadata.extension}</div>
-                      </>
-                    )}
-                    
-                    {selectedFile.metadata.size && (
-                      <>
-                        <div className="text-slate-600">Size:</div>
-                        <div className="font-medium">
-                          {(selectedFile.metadata.size / 1024).toFixed(2)} KB
-                        </div>
-                      </>
-                    )}
+                    <div className="text-xs text-muted-foreground">Folders</div>
                   </div>
-                </CardContent>
-              </Card>
             </div>
-          ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                <p className="font-medium">Select a file to view details</p>
-                <p className="text-sm">Click on any file in the sidebar</p>
               </div>
             </div>
           )}
         </main>
 
-        {/* Right Sidebar - Compliance or Templates */}
-        <aside className="w-80 border-l bg-background overflow-hidden flex flex-col">
+        {/* Right Sidebar - Agent List or Templates */}
+        <aside className="w-96 border-l bg-background overflow-hidden flex flex-col flex-shrink-0">
           {showTemplates ? (
-            <RuleTemplatesPanel
-              templates={RuleTemplates}
-              onSelectTemplate={(template) => {
-                // Add rule from template
-                const newRule: Rule = {
-                  id: `rule-${Date.now()}`,
-                  workspaceId: workspace.id,
-                  name: template.name,
-                  description: template.description,
-                  type: template.type,
-                  severity: 'warning',
-                  enabled: true,
-                  config: template.config,
-                  scope: { applyToAll: true },
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                  createdBy: 'demo-user',
-                };
-                setRules([...rules, newRule]);
-                setShowTemplates(false);
-              }}
+            <AgentTemplatesPanel
+              templates={getAgentTemplates()}
+              onSelectTemplate={handleSelectTemplate}
+              onClose={() => setShowTemplates(false)}
             />
           ) : (
-            <CompliancePanel
-              violations={violations}
-              onViolationClick={(violation) => {
-                // Find and select the file with this violation
-                const files = extractAllFiles(fileTree);
-                const file = files.find(f => f.id === violation.fileNodeId);
-                if (file) {
-                  setSelectedFile(file);
-                }
-              }}
+            <AgentListPanel
+              folder={selectedFolder}
+              agents={agents}
+              onAddAgent={selectedFolder ? () => handleAddAgent(selectedFolder) : undefined}
+              onEditAgent={handleEditAgent}
+              onDeleteAgent={handleDeleteAgent}
+              onToggleAgent={handleToggleAgent}
+              onRunAgent={handleRunAgent}
             />
           )}
         </aside>
       </div>
 
-      {/* Active Rules Footer */}
-      <footer className="border-t bg-muted px-4 py-2">
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-muted-foreground font-medium">Active Rules:</span>
-          {rules.filter(r => r.enabled).map(rule => (
-            <Badge key={rule.id} variant="outline" className="text-xs text-black">
-              {rule.name}
+      {/* Footer - Active Agents Summary */}
+      <footer className="border-t bg-muted/30 px-4 py-2 flex items-center justify-between text-sm flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <span className="text-muted-foreground font-medium">Active Agents:</span>
+          <div className="flex items-center gap-2">
+            {agents.filter(a => a.enabled).slice(0, 5).map(agent => (
+              <Badge key={agent.id} variant="outline" className="text-xs">
+                {agent.name}
             </Badge>
           ))}
+            {enabledAgentsCount > 5 && (
+              <Badge variant="outline" className="text-xs">
+                +{enabledAgentsCount - 5} more
+              </Badge>
+            )}
+          </div>
+        </div>
+        
+        <div className="text-xs text-muted-foreground">
+          Sandbox • Changes are not persisted
         </div>
       </footer>
     </div>
   );
 }
-

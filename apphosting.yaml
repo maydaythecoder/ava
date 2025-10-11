@@ -7,6 +7,10 @@ runConfig:
   cpu: 2
   memoryMiB: 1024
 
+# Build configuration
+buildConfig:
+  nodeVersion: 20
+
 # Environment variables and secrets.
 env:
   # Supabase Configuration (public keys - safe to expose)

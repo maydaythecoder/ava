@@ -3,7 +3,7 @@
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { X, Plus } from 'lucide-react';
+import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { AgentTemplate } from '@/lib/agent-demo-data';
 
 interface AgentTemplatesPanelProps {
@@ -41,7 +41,7 @@ export function AgentTemplatesPanel({
       <div className="p-4 border-b bg-background flex items-center justify-between">
         <h2 className="font-semibold text-lg">Agent Templates</h2>
         <Button variant="ghost" size="sm" onClick={onClose}>
-          <X size={18} />
+          <XMarkIcon className="size-5" />
         </Button>
       </div>
 
@@ -86,7 +86,7 @@ export function AgentTemplatesPanel({
                         onSelectTemplate(template);
                       }}
                     >
-                      <Plus size={14} />
+                      <PlusIcon className="size-4" />
                       Use Template
                     </Button>
                   </CardContent>

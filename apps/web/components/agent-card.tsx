@@ -5,16 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { 
-  Play, 
-  Pause, 
-  Edit, 
-  Trash2, 
-  Link as LinkIcon, 
-  Server, 
-  Calendar,
-  FolderOpen,
-  Sparkles
-} from 'lucide-react';
+  PlayIcon, 
+  PauseIcon, 
+  PencilIcon, 
+  TrashIcon, 
+  LinkIcon, 
+  ServerIcon, 
+  CalendarIcon,
+  FolderOpenIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 
 interface AgentCardProps {
   agent: Agent;
@@ -78,7 +78,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 title="Run now"
                 className="h-8 w-8 p-0"
               >
-                <Play size={16} />
+                <PlayIcon className="size-4" />
               </Button>
             )}
             {onToggle && (
@@ -89,7 +89,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 title={agent.enabled ? 'Disable' : 'Enable'}
                 className="h-8 w-8 p-0"
               >
-                {agent.enabled ? <Pause size={16} /> : <Play size={16} />}
+                {agent.enabled ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
               </Button>
             )}
             {onEdit && (
@@ -100,7 +100,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 title="Edit"
                 className="h-8 w-8 p-0"
               >
-                <Edit size={16} />
+                <PencilIcon className="size-4" />
               </Button>
             )}
             {onDelete && (
@@ -111,7 +111,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
                 title="Delete"
                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
               >
-                <Trash2 size={16} />
+                <TrashIcon className="size-4" />
               </Button>
             )}
           </div>
@@ -121,7 +121,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
       <CardContent className="space-y-4">
         {/* Location */}
         <div className="flex items-start gap-2 text-sm">
-          <FolderOpen size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+          <FolderOpenIcon className="size-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <div className="font-medium text-xs text-muted-foreground mb-1">Location</div>
             <code className="text-xs bg-muted px-2 py-1 rounded">{agent.folderPath}/{agent.fileName}</code>
@@ -131,7 +131,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
         {/* Prompt */}
         <div className="space-y-1">
           <div className="font-medium text-xs text-muted-foreground flex items-center gap-1">
-            <Sparkles size={14} />
+            <SparklesIcon className="size-3.5" />
             Prompt
           </div>
           <div className="text-sm bg-muted p-3 rounded-md whitespace-pre-wrap">
@@ -153,7 +153,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
         {agent.contextLinks && agent.contextLinks.length > 0 && (
           <div className="space-y-2">
             <div className="font-medium text-xs text-muted-foreground flex items-center gap-1">
-              <LinkIcon size={14} />
+              <LinkIcon className="size-3.5" />
               Context Links ({agent.contextLinks.length})
             </div>
             <div className="space-y-1">
@@ -176,7 +176,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
         {agent.contextMcpServers && agent.contextMcpServers.length > 0 && (
           <div className="space-y-2">
             <div className="font-medium text-xs text-muted-foreground flex items-center gap-1">
-              <Server size={14} />
+              <ServerIcon className="size-3.5" />
               MCP Servers ({agent.contextMcpServers.length})
             </div>
             <div className="flex flex-wrap gap-1">
@@ -221,7 +221,7 @@ export function AgentCard({ agent, onEdit, onDelete, onToggle, onRun }: AgentCar
         {/* Last Run */}
         {agent.lastRunAt && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
-            <Calendar size={12} />
+            <CalendarIcon className="size-3" />
             Last run: {new Date(agent.lastRunAt).toLocaleString()}
           </div>
         )}

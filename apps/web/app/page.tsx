@@ -30,7 +30,7 @@ export default function App() {
       </span>
       
       {/* Button to bottom right of inputs */}
-      <span className="z-20 absolute bottom-16 left-6/12 ml-16 transform translate-x-20">
+      <span className="z-20 absolute bottom-16 right-[34%] transform translate-x-20">
         <button className="text-md text-white px-6 py-4 bg-[#4f4ff6] rounded-lg hover:bg-[#3333DD] transition-all duration-300">Join waiting list</button>
       </span>
       

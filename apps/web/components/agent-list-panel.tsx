@@ -3,7 +3,7 @@
 import { Agent, FolderNode } from '@/store/agent-store';
 import { AgentCard } from './agent-card';
 import { Button } from './ui/button';
-import { Plus, Sparkles } from 'lucide-react';
+import { PlusIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 interface AgentListPanelProps {
   folder: FolderNode | null;
@@ -33,12 +33,12 @@ export function AgentListPanel({
       <div className="p-4 border-b bg-background">
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold text-lg flex items-center gap-2">
-            <Sparkles className="text-purple-500" size={20} />
+            <SparklesIcon className="size-5 text-purple-500" />
             Agents
           </h2>
           {folder && onAddAgent && (
             <Button onClick={onAddAgent} size="sm" className="gap-2">
-              <Plus size={16} />
+              <PlusIcon className="size-4" />
               Add Agent
             </Button>
           )}
@@ -54,7 +54,7 @@ export function AgentListPanel({
         {!folder ? (
           <div className="h-full flex items-center justify-center text-center p-6">
             <div>
-              <Sparkles size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+              <SparklesIcon className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="font-medium">Select a folder</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Choose a folder to view or create agents
@@ -64,14 +64,14 @@ export function AgentListPanel({
         ) : folderAgents.length === 0 ? (
           <div className="h-full flex items-center justify-center text-center p-6">
             <div>
-              <Sparkles size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+              <SparklesIcon className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="font-medium">No agents yet</p>
               <p className="text-sm text-muted-foreground mt-1 mb-4">
                 Create an agent to automate tasks in this folder
               </p>
               {onAddAgent && (
                 <Button onClick={onAddAgent} className="gap-2">
-                  <Plus size={16} />
+                  <PlusIcon className="size-4" />
                   Create First Agent
                 </Button>
               )}

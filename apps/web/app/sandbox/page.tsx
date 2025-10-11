@@ -22,6 +22,9 @@ import {
   getAgentTemplates,
   AgentTemplate
 } from '@/lib/agent-demo-data';
+import { Gugi } from 'next/font/google';
+
+const gugi = Gugi({ weight: '400', subsets: ['latin'] });
 
 export default function SandboxPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -135,7 +138,7 @@ export default function SandboxPage() {
             <div className="relative flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-r dark:before:border-white/10 dark:before:bg-black/10">
             <div className="relative flex h-16 shrink-0 items-center">
               <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              <span className="ml-2 text-xl font-bold dark:text-white">Ava</span>
+              <span className={`ml-2 text-xl font-bold dark:text-white ${gugi.className}`}>AVA</span>
             </div>
               <nav className="relative flex flex-1 flex-col">
                 <div className="flex-1">
@@ -159,7 +162,7 @@ export default function SandboxPage() {
         <div className="relative flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
           <div className="relative flex h-16 shrink-0 items-center">
             <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Ava</span>
+            <span className={`ml-2 text-xl font-bold text-gray-900 dark:text-white ${gugi.className}`}>AVA</span>
             <Badge variant="outline" className="ml-3 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
               Sandbox
             </Badge>
@@ -204,7 +207,7 @@ export default function SandboxPage() {
         </button>
         <div className="relative flex-1 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          Ava Sandbox
+          <span className={gugi.className}>AVA</span> Sandbox
           </div>
         <button
           onClick={() => setShowTemplates(!showTemplates)}
@@ -273,22 +276,26 @@ export default function SandboxPage() {
                   </div>
 
                   {/* Stats */}
-                  <div className="mt-16 grid grid-cols-3 gap-8">
-                    <div>
-                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{totalAgentsCount}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Agents</div>
+                  <dl className="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-3">
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Agents</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        {totalAgentsCount}
+                      </dd>
                     </div>
-                    <div>
-                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">{enabledAgentsCount}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Active</div>
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Active Agents</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        {enabledAgentsCount}
+                      </dd>
                     </div>
-                    <div>
-                      <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    <div className="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5">
+                      <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400">Active Folders</dt>
+                      <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
                         {new Set(agents.map(a => a.folderPath)).size}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Folders</div>
+                      </dd>
                     </div>
-                  </div>
+                  </dl>
             </div>
               </div>
             )}

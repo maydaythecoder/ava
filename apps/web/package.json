@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "cd ../.. && pnpm install && pnpm -r --filter '@ava/web^...' run build",
+    "prebuild": "cd ../../packages/common-types && pnpm build && cd ../git-bridge && pnpm build && cd ../ai-service && pnpm build && cd ../rules-engine && pnpm build && cd ../workflow-parser && pnpm build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

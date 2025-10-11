@@ -1,16 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  SparklesIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline';
 import { Agent, FolderNode } from '@/store/agent-store';
 import { FolderTreeWithAgents } from '@/components/folder-tree-with-agents';
 import { AgentCreator } from '@/components/agent-creator';
 import { AgentListPanel } from '@/components/agent-list-panel';
 import { AgentTemplatesPanel } from '@/components/agent-templates-panel';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Settings, FolderTree, Play } from 'lucide-react';
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/theme-toggle';
 import {
   createDemoWorkspaceId,
   createDemoFolderTree,
@@ -20,7 +24,7 @@ import {
 } from '@/lib/agent-demo-data';
 
 export default function SandboxPage() {
-  // Initialize with demo data
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [folderTree] = useState<FolderNode>(createDemoFolderTree());
   const [agents, setAgents] = useState<Agent[]>(createDemoAgents());
   const [selectedFolder, setSelectedFolder] = useState<FolderNode | null>(null);
@@ -56,7 +60,6 @@ export default function SandboxPage() {
   };
 
   const handleEditAgent = (agent: Agent) => {
-    // TODO: Implement edit mode
     console.log('Edit agent:', agent);
   };
 
@@ -82,7 +85,6 @@ export default function SandboxPage() {
       return;
     }
 
-    // Pre-fill agent creator with template data
     const templateAgent: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'> = {
       workspaceId: createDemoWorkspaceId(),
       folderPath: selectedFolder.path,
@@ -108,180 +110,212 @@ export default function SandboxPage() {
   const totalAgentsCount = agents.length;
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b bg-background px-4 py-3 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            Ava
-          </Link>
-          <Badge variant="outline" className="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
-            Sandbox Mode
-          </Badge>
-          <span className="text-sm text-slate-600 dark:text-slate-400">{workspaceName}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="text-sm text-muted-foreground mr-2">
-            <span className="font-medium">{enabledAgentsCount}</span> / {totalAgentsCount} agents active
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setShowTemplates(!showTemplates);
-              setIsCreatingAgent(false);
-            }}
-          >
-            <Settings size={16} className="mr-2" />
-            Templates
-          </Button>
-          <ThemeToggle />
-        </div>
-      </header>
+    <div className="h-screen bg-white dark:bg-gray-900">
+      {/* Mobile sidebar */}
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+        />
 
-      {/* Info Banner */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-b border-purple-200 dark:border-purple-900 px-4 py-3 flex-shrink-0">
-        <div className="flex items-start gap-3">
-          <Sparkles size={18} className="text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-          <div className="flex-1 text-sm">
-            <p className="text-purple-900 dark:text-purple-100 font-medium mb-1">
-              Welcome to Ava Agent Studio!
-            </p>
-            <p className="text-purple-700 dark:text-purple-300">
-              Create AI agents to automate your workflow. Click any folder and hit the + button to add an agent, 
-              or use templates to get started quickly. Agents run based on triggers you define.
-            </p>
+        <div className="fixed inset-0 flex">
+          <DialogPanel
+            transition
+            className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+          >
+            <TransitionChild>
+              <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
+                <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
+                  <span className="sr-only">Close sidebar</span>
+                  <XMarkIcon aria-hidden="true" className="size-6 text-white" />
+                </button>
+              </div>
+            </TransitionChild>
+
+            <div className="relative flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-r dark:before:border-white/10 dark:before:bg-black/10">
+            <div className="relative flex h-16 shrink-0 items-center">
+              <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <span className="ml-2 text-xl font-bold dark:text-white">Ava</span>
+            </div>
+              <nav className="relative flex flex-1 flex-col">
+                <div className="flex-1">
+                  <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-3">PROJECT STRUCTURE</h2>
+                  <FolderTreeWithAgents
+                    tree={folderTree}
+                    agents={agents}
+                    onSelectFolder={handleSelectFolder}
+                    onAddAgent={handleAddAgent}
+                    selectedFolderId={selectedFolder?.id}
+                  />
+                </div>
+              </nav>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Static sidebar for desktop */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
+        <div className="relative flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
+          <div className="relative flex h-16 shrink-0 items-center">
+            <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Ava</span>
+            <Badge variant="outline" className="ml-3 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
+              Sandbox
+            </Badge>
           </div>
+          <nav className="relative flex flex-1 flex-col">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500">PROJECT STRUCTURE</h2>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {enabledAgentsCount}/{totalAgentsCount} active
+                </span>
+              </div>
+              <FolderTreeWithAgents
+                tree={folderTree}
+                agents={agents}
+                onSelectFolder={handleSelectFolder}
+                onAddAgent={handleAddAgent}
+                selectedFolderId={selectedFolder?.id}
+              />
+            </div>
+            <div className="-mx-6 mt-auto border-t border-gray-200 dark:border-white/10">
+              <div className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold text-gray-900 dark:text-white">
+                <span className="size-8 rounded-full bg-gray-50 flex items-center justify-center outline-1 -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10">
+                  <span className="text-xs">DC</span>
+                </span>
+                <span aria-hidden="true">{workspaceName}</span>
+              </div>
+            </div>
+          </nav>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Folder Tree */}
-        <aside className="w-80 border-r bg-muted/30 overflow-y-auto flex-shrink-0">
-          <div className="p-3 border-b bg-background sticky top-0 z-10">
-            <h2 className="font-semibold text-sm flex items-center gap-2">
-              <FolderTree size={16} />
-              Project Structure
-            </h2>
+      {/* Mobile header */}
+      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden dark:bg-gray-900 dark:shadow-none dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:border-b dark:before:border-white/10 dark:before:bg-black/10">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="relative -m-2.5 p-2.5 text-gray-700 lg:hidden dark:text-gray-400"
+        >
+          <span className="sr-only">Open sidebar</span>
+          <Bars3Icon aria-hidden="true" className="size-6" />
+        </button>
+        <div className="relative flex-1 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          Ava Sandbox
           </div>
-          <div className="p-2">
-            <FolderTreeWithAgents
-              tree={folderTree}
-              agents={agents}
-              onSelectFolder={handleSelectFolder}
-              onAddAgent={handleAddAgent}
-              selectedFolderId={selectedFolder?.id}
-            />
+        <button
+          onClick={() => setShowTemplates(!showTemplates)}
+          aria-label="Toggle settings"
+          className="relative rounded-md text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+        >
+          <Cog6ToothIcon className="size-6" />
+        </button>
           </div>
-        </aside>
 
-        {/* Center Content - Agent Creator or Welcome */}
-        <main className="flex-1 overflow-y-auto bg-background">
-          {isCreatingAgent && selectedFolder ? (
-            <AgentCreator
-              folder={selectedFolder}
-              onSave={handleSaveAgent}
-              onCancel={handleCancelCreate}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-center p-6">
-              <div className="max-w-md">
-                <Sparkles size={64} className="mx-auto mb-6 text-purple-500 opacity-80" />
-                <h1 className="text-3xl font-bold mb-4">Create Your First Agent</h1>
-                <p className="text-muted-foreground mb-6">
-                  Select a folder from the tree on the left and click the + button to create an agent,
-                  or browse templates to get started with pre-built configurations.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    size="lg"
-                    onClick={() => setShowTemplates(true)}
-                    className="gap-2"
-                  >
-                    <Settings size={18} />
-                    Browse Templates
-                  </Button>
-                  {selectedFolder && (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      onClick={() => handleAddAgent(selectedFolder)}
-                      className="gap-2"
-                    >
-                      <Play size={18} />
-                      Create Custom Agent
-                    </Button>
-                  )}
-              </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t">
-                  <div>
-                    <div className="text-2xl font-bold text-purple-600">{totalAgentsCount}</div>
-                    <div className="text-xs text-muted-foreground">Total Agents</div>
+      {/* Main content area */}
+      <main className="lg:pl-80">
+        <div className="xl:pr-96">
+          <div className="h-screen overflow-y-auto">
+            {/* Info banner */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-purple-200 px-4 py-3 sm:px-6 lg:px-8 dark:from-purple-950/30 dark:to-blue-950/30 dark:border-purple-900">
+              <div className="flex items-start gap-3">
+                <SparklesIcon className="size-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 text-sm">
+                  <p className="text-purple-900 dark:text-purple-100 font-medium mb-1">
+                    Welcome to Ava Agent Studio
+                  </p>
+                  <p className="text-purple-700 dark:text-purple-300">
+                    Create AI agents to automate your workflow. Click any folder and hit the + button to add an agent.
+                  </p>
                             </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">{enabledAgentsCount}</div>
-                    <div className="text-xs text-muted-foreground">Active</div>
                           </div>
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600">
-                      {new Set(agents.map(a => a.folderPath)).size}
                         </div>
-                    <div className="text-xs text-muted-foreground">Folders</div>
+
+            {/* Content */}
+            {isCreatingAgent && selectedFolder ? (
+              <div className="px-4 py-6 sm:px-6 lg:px-8">
+                <AgentCreator
+                  folder={selectedFolder}
+                  onSave={handleSaveAgent}
+                  onCancel={handleCancelCreate}
+                />
+                        </div>
+            ) : (
+              <div className="px-4 py-10 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl text-center">
+                  <SparklesIcon className="size-16 mx-auto mb-6 text-purple-500 opacity-80" />
+                  <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    Create Your First Agent
+                  </h1>
+                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                    Select a folder from the sidebar and click the + button to create an agent, or browse templates to get started.
+                  </p>
+                  <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      onClick={() => setShowTemplates(true)}
+                      className="inline-flex items-center rounded-md bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 dark:bg-purple-500 dark:hover:bg-purple-400"
+                    >
+                      <Cog6ToothIcon className="size-5 mr-2" />
+                      Browse Templates
+                    </button>
+                    {selectedFolder && (
+                      <button
+                        onClick={() => handleAddAgent(selectedFolder)}
+                        className="inline-flex items-center rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+                      >
+                        <PlusIcon className="size-5 mr-2" />
+                        Create Custom Agent
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="mt-16 grid grid-cols-3 gap-8">
+                    <div>
+                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{totalAgentsCount}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Agents</div>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">{enabledAgentsCount}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Active</div>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                        {new Set(agents.map(a => a.folderPath)).size}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Folders</div>
+                    </div>
                   </div>
             </div>
               </div>
+            )}
+              </div>
             </div>
-          )}
         </main>
 
-        {/* Right Sidebar - Agent List or Templates */}
-        <aside className="w-96 border-l bg-background overflow-hidden flex flex-col flex-shrink-0">
+      {/* Right sidebar */}
+      <aside className="fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 xl:block dark:border-white/10">
           {showTemplates ? (
-            <AgentTemplatesPanel
-              templates={getAgentTemplates()}
-              onSelectTemplate={handleSelectTemplate}
-              onClose={() => setShowTemplates(false)}
+          <AgentTemplatesPanel
+            templates={getAgentTemplates()}
+            onSelectTemplate={handleSelectTemplate}
+            onClose={() => setShowTemplates(false)}
             />
           ) : (
-            <AgentListPanel
-              folder={selectedFolder}
-              agents={agents}
-              onAddAgent={selectedFolder ? () => handleAddAgent(selectedFolder) : undefined}
-              onEditAgent={handleEditAgent}
-              onDeleteAgent={handleDeleteAgent}
-              onToggleAgent={handleToggleAgent}
-              onRunAgent={handleRunAgent}
+          <AgentListPanel
+            folder={selectedFolder}
+            agents={agents}
+            onAddAgent={selectedFolder ? () => handleAddAgent(selectedFolder) : undefined}
+            onEditAgent={handleEditAgent}
+            onDeleteAgent={handleDeleteAgent}
+            onToggleAgent={handleToggleAgent}
+            onRunAgent={handleRunAgent}
             />
           )}
         </aside>
-      </div>
-
-      {/* Footer - Active Agents Summary */}
-      <footer className="border-t bg-muted/30 px-4 py-2 flex items-center justify-between text-sm flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <span className="text-muted-foreground font-medium">Active Agents:</span>
-          <div className="flex items-center gap-2">
-            {agents.filter(a => a.enabled).slice(0, 5).map(agent => (
-              <Badge key={agent.id} variant="outline" className="text-xs">
-                {agent.name}
-            </Badge>
-          ))}
-            {enabledAgentsCount > 5 && (
-              <Badge variant="outline" className="text-xs">
-                +{enabledAgentsCount - 5} more
-              </Badge>
-            )}
-          </div>
-        </div>
-        
-        <div className="text-xs text-muted-foreground">
-          Sandbox • Changes are not persisted
-        </div>
-      </footer>
     </div>
   );
 }

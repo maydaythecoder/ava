@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus, Link as LinkIcon, Server, Save, Sparkles } from 'lucide-react';
-import { Button } from './ui/button';
+import { XMarkIcon, PlusIcon, LinkIcon, ServerIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Badge } from './ui/badge';
@@ -108,20 +107,25 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Sparkles className="text-purple-500" size={24} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <SparklesIcon className="text-purple-500 size-6" />
             Create New Agent
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             In: <span className="font-mono text-xs">{folder.path}</span>
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          <X size={18} />
-        </Button>
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label="Close"
+          className="rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+        >
+          <XMarkIcon className="size-6" />
+        </button>
       </div>
 
       {/* Agent Name */}
@@ -176,7 +180,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <LinkIcon size={16} />
+            <LinkIcon className="size-4" />
             Context Links
           </CardTitle>
           <CardDescription>Add reference links for the agent</CardDescription>
@@ -189,24 +193,29 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
               onChange={(e) => setNewLink(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddLink()}
             />
-            <Button onClick={handleAddLink} size="sm" variant="secondary">
-              <Plus size={16} />
-            </Button>
+                <button
+                  type="button"
+                  onClick={handleAddLink}
+                  aria-label="Add link"
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+                >
+                  <PlusIcon className="size-4" />
+                </button>
           </div>
           {links.length > 0 && (
             <div className="space-y-2">
               {links.map((link, index) => (
                 <div key={index} className="flex items-center gap-2 bg-muted p-2 rounded-md">
-                  <LinkIcon size={14} className="text-muted-foreground flex-shrink-0" />
+                  <LinkIcon className="size-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   <span className="text-sm flex-1 truncate">{link}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleRemoveLink(index)}
-                    className="h-6 w-6 p-0"
+                    aria-label="Remove link"
+                    className="rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                   >
-                    <X size={14} />
-                  </Button>
+                    <XMarkIcon className="size-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -218,7 +227,7 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Server size={16} />
+            <ServerIcon className="size-4" />
             MCP Servers
           </CardTitle>
           <CardDescription>Connect to Model Context Protocol servers</CardDescription>
@@ -231,24 +240,29 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
               onChange={(e) => setNewMcpServer(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddMcpServer()}
             />
-            <Button onClick={handleAddMcpServer} size="sm" variant="secondary">
-              <Plus size={16} />
-            </Button>
+            <button
+              type="button"
+              onClick={handleAddMcpServer}
+              aria-label="Add MCP server"
+              className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+            >
+              <PlusIcon className="size-4" />
+            </button>
           </div>
           {mcpServers.length > 0 && (
             <div className="space-y-2">
               {mcpServers.map((server, index) => (
                 <div key={index} className="flex items-center gap-2 bg-muted p-2 rounded-md">
-                  <Server size={14} className="text-muted-foreground flex-shrink-0" />
+                  <ServerIcon className="size-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   <span className="text-sm flex-1 truncate">{server}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleRemoveMcpServer(index)}
-                    className="h-6 w-6 p-0"
+                    aria-label="Remove MCP server"
+                    className="rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                   >
-                    <X size={14} />
-                  </Button>
+                    <XMarkIcon className="size-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -292,14 +306,18 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             {(['all', 'paths', 'types'] as const).map((type) => (
-              <Button
+              <button
                 key={type}
-                variant={scopeType === type ? 'default' : 'outline'}
-                size="sm"
+                type="button"
                 onClick={() => setScopeType(type)}
+                className={
+                  scopeType === type
+                    ? 'inline-flex items-center rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400'
+                    : 'inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20'
+                }
               >
                 {type === 'all' ? 'All Files' : type === 'paths' ? 'Specific Paths' : 'File Types'}
-              </Button>
+              </button>
             ))}
           </div>
 
@@ -312,17 +330,22 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
                   onChange={(e) => setNewPath(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddPath()}
                 />
-                <Button onClick={handleAddPath} size="sm" variant="secondary">
-                  <Plus size={16} />
-                </Button>
+                <button
+                  type="button"
+                  onClick={handleAddPath}
+                  aria-label="Add path"
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+                >
+                  <PlusIcon className="size-4" />
+                </button>
               </div>
               {includePaths.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {includePaths.map((path, index) => (
                     <Badge key={index} variant="secondary" className="gap-2">
                       {path}
-                      <button title="Remove path" onClick={() => handleRemovePath(index)}>
-                        <X size={12} />
+                      <button title="Remove path" type="button" onClick={() => handleRemovePath(index)}>
+                        <XMarkIcon className="size-3" />
                       </button>
                     </Badge>
                   ))}
@@ -340,17 +363,22 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
                   onChange={(e) => setNewFileType(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddFileType()}
                 />
-                <Button onClick={handleAddFileType} size="sm" variant="secondary">
-                  <Plus size={16} />
-                </Button>
+                <button
+                  type="button"
+                  onClick={handleAddFileType}
+                  aria-label="Add file type"
+                  className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+                >
+                  <PlusIcon className="size-4" />
+                </button>
               </div>
               {fileTypes.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {fileTypes.map((type, index) => (
                     <Badge key={index} variant="secondary" className="gap-2">
                       .{type}
-                      <button title="Remove file type" onClick={() => handleRemoveFileType(index)}>
-                        <X size={12} />
+                      <button title="Remove file type" type="button" onClick={() => handleRemoveFileType(index)}>
+                        <XMarkIcon className="size-3" />
                       </button>
                     </Badge>
                   ))}
@@ -362,14 +390,22 @@ export function AgentCreator({ folder, onSave, onCancel }: AgentCreatorProps) {
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pb-6">
-        <Button onClick={handleSave} className="flex-1" size="lg">
-          <Save size={18} className="mr-2" />
+      <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-white/10">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="flex-1 inline-flex items-center justify-center rounded-md bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 dark:bg-purple-500 dark:hover:bg-purple-400"
+        >
+          <CheckIcon className="size-5 mr-2" />
           Save Agent
-        </Button>
-        <Button onClick={onCancel} variant="outline" size="lg">
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="inline-flex items-center rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:ring-white/20 dark:hover:bg-white/20"
+        >
           Cancel
-        </Button>
+        </button>
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ runConfig:
 # Build configuration
 buildConfig:
   nodeVersion: 20
+  # Specify the root directory for the Next.js app in monorepo
+  rootDirectory: apps/web
 
 # Environment variables and secrets.
 env:

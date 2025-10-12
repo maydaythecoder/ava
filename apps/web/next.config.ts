@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false, // SECURITY: Remove powered-by header
   reactStrictMode: true,
+  output: 'standalone', // Required for Firebase App Hosting
   experimental: {
     optimizePackageImports: ['@splinetool/react-spline'],
   },
